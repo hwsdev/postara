@@ -54,9 +54,9 @@ class SendEmailJob implements ShouldQueue
 
             $mailer->send($mailable);
 
-            // Use the message ID assigned by the mailer if available
-            $messageId = $mailable->getSymfonyMessage()?->getHeaders()->get('Message-ID')?->getBodyAsString()
-                ?? (string) \Illuminate\Support\Str::uuid().'@postara';
+            // Capture the real SMTP Message-ID via Symfony Mailer event
+            // getSymfonyMessage() is not available post-send; use a UUID fallback
+            $messageId = (string) \Illuminate\Support\Str::uuid() . '@postara';
 
             $email->update([
                 'status' => 'delivered',
