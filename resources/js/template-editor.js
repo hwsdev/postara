@@ -6,7 +6,6 @@ window.initTemplateEditor = function (options = {}) {
     const {
         containerId = 'gjs',
         initialHtml = '',
-        initialCss = '',
         onSave = null,
     } = options;
 
@@ -15,66 +14,24 @@ window.initTemplateEditor = function (options = {}) {
         height: '100%',
         width: 'auto',
         storageManager: false,
-        undoManager: { trackChanges: true },
+        fromElement: false,
 
         plugins: [newsletterPlugin],
         pluginsOpts: {
             [newsletterPlugin]: {
+                inlineCss: true,
                 modalLabelImport: 'Paste HTML here',
                 modalLabelExport: 'Copy HTML',
-                codeViewerTheme: 'material',
                 importPlaceholder: '<!-- Paste your HTML email here -->',
-                inlineCss: true,
                 cellStyle: {
                     'font-size': '14px',
-                    'font-weight': 300,
+                    'font-weight': '300',
                     'vertical-align': 'top',
-                    color: 'rgb(111, 119, 125)',
+                    color: '#454545',
                     margin: 0,
                     padding: 0,
                 },
             },
-        },
-
-        // Uber-inspired panel layout
-        panels: {
-            defaults: [
-                {
-                    id: 'panel-top',
-                    el: '.panel__top',
-                    buttons: [],
-                },
-                {
-                    id: 'basic-actions',
-                    el: '.panel__basic-actions',
-                    buttons: [
-                        {
-                            id: 'undo',
-                            className: 'gjs-btn-prim',
-                            label: '↩ Undo',
-                            command: 'core:undo',
-                        },
-                        {
-                            id: 'redo',
-                            className: 'gjs-btn-prim',
-                            label: '↪ Redo',
-                            command: 'core:redo',
-                        },
-                        {
-                            id: 'export',
-                            className: 'gjs-btn-prim',
-                            label: '&lt;/&gt; HTML',
-                            command: 'export-template',
-                        },
-                        {
-                            id: 'save-btn',
-                            className: 'gjs-btn-prim gjs-btn-save',
-                            label: '💾 Save',
-                            command: 'save-template',
-                        },
-                    ],
-                },
-            ],
         },
 
         canvas: {
@@ -88,12 +45,9 @@ window.initTemplateEditor = function (options = {}) {
     if (initialHtml) {
         editor.setComponents(initialHtml);
     }
-    if (initialCss) {
-        editor.setStyle(initialCss);
-    }
 
-    // Save command — calls the onSave callback with HTML + CSS
-    editor.Commands.add('save-template', {
+    // Add save command
+    editor.Commands.add('save-db', {
         run(ed) {
             const html = ed.runCommand('gjs-get-inlined-html');
             const css  = ed.getCss();
@@ -103,11 +57,13 @@ window.initTemplateEditor = function (options = {}) {
         },
     });
 
-    // Style the editor to match Uber design system
-    editor.on('load', () => {
-        // Remove default GrapesJS branding
-        const logo = document.querySelector('.gjs-logo-version');
-        if (logo) logo.remove();
+    // Add save button to existing panels
+    editor.Panels.addButton('options', {
+        id: 'save-db',
+        className: 'fa fa-floppy-o',
+        label: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>`,
+        command: 'save-db',
+        attributes: { title: 'Save template' },
     });
 
     return editor;
