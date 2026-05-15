@@ -42,6 +42,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Contacts
     Route::get('/contacts', fn () => view('dashboard.contacts'))->name('contacts.index');
+    Route::get('/contacts/lists', fn () => view('dashboard.contact-lists'))->name('contacts.lists');
 
     // Campaigns
     Route::get('/campaigns', fn () => view('dashboard.campaigns'))->name('campaigns.index');
@@ -52,4 +53,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Suppression
     Route::get('/suppressions', fn () => view('dashboard.suppressions'))->name('suppressions.index');
+
+    // Settings
+    Route::get('/settings', fn () => view('dashboard.settings'))->name('settings.index');
 });

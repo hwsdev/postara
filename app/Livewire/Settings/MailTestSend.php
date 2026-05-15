@@ -15,8 +15,12 @@ class MailTestSend extends Component
 
     public function mount(): void
     {
-        $this->toEmail = auth()->user()->email;
-        $this->toName  = auth()->user()->name;
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        if ($user) {
+            $this->toEmail = $user->email;
+            $this->toName  = $user->name;
+        }
     }
 
     public function send(): void

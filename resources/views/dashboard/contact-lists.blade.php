@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot name="title">Contacts</x-slot>
+    <x-slot name="title">Contact Lists</x-slot>
 
     {{-- Tab nav --}}
     <div class="flex gap-0 border-b border-gray-200 mb-6 -mt-2">
@@ -15,5 +15,5 @@
         </a>
     </div>
 
-    <livewire:contacts.contact-list />
+    <livewire:contacts.contact-list-manager />
 </x-app-layout>
