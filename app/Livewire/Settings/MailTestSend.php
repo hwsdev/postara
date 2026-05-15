@@ -97,7 +97,16 @@ class MailTestSend extends Component
         $password   = (string) Setting::get('mail_password', '');
         $encryption = (string) Setting::get('mail_encryption', '');
 
-        $tls = $encryption === 'tls';
+        // Symfony EsmtpTransport $tls parameter:
+        //   true  = implicit SSL (port 465, ssl:// prefix)
+        //   false = plain / STARTTLS negotiation (port 587 or 25)
+        //   null  = auto-detect (true if port 465, false otherwise)
+        $tls = match ($encryption) {
+            'ssl'  => true,   // port 465 — implicit SSL
+            'tls'  => false,  // port 587 — STARTTLS (negotiated after connect)
+            default => null,  // auto-detect
+        };
+
         $transport = new EsmtpTransport($host, $port, $tls);
 
         if (! empty($username)) {

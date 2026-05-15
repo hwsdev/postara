@@ -157,7 +157,15 @@ class SetupWizard extends Component
 
         // SMTP / Postfix
         try {
-            $tls = $cfg['encryption'] === 'tls';
+            // $tls = true  → implicit SSL (port 465)
+            // $tls = false → plain + STARTTLS negotiation (port 587/25)
+            // $tls = null  → auto-detect by port
+            $tls = match ($cfg['encryption']) {
+                'ssl'  => true,
+                'tls'  => false,
+                default => null,
+            };
+
             $transport = new \Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport(
                 $cfg['host'],
                 (int) $cfg['port'],
