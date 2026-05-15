@@ -56,6 +56,8 @@ class GeneralSettings extends Component
         $this->mailFromName    = Setting::get('mail_from_name', '');
         $this->cloudflareToken = Setting::get('cloudflare_token', '');
         $this->mailChannelsApiKey = Setting::get('mailchannels_api_key', '');
+        // Load password into state so it's preserved on save even if field is left blank
+        $this->mailPassword = Setting::get('mail_password', '');
     }
 
     public function save(): void

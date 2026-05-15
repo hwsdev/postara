@@ -62,8 +62,12 @@
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-600 mb-1.5">Password / API key</label>
-                            <input wire:model="mailPassword" type="password" placeholder="Optional"
+                            <input wire:model="mailPassword" type="password"
+                                   placeholder="{{ $mailPassword ? '••••••••' : 'Optional' }}"
                                    class="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-black transition-colors">
+                            @if ($mailPassword)
+                                <p class="mt-1 text-xs text-gray-400">Password saved. Enter a new one to change it.</p>
+                            @endif
                         </div>
                     </div>
                     <div>
