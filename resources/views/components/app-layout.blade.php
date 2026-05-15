@@ -55,8 +55,11 @@
             @endphp
 
             @foreach ($navItems as $item)
-                @php $active = request()->routeIs($item['route']); @endphp
-                <a href="{{ route($item['route']) }}"
+                @php
+                    $active = request()->routeIs($item['route']);
+                    $href = \Illuminate\Support\Facades\Route::has($item['route']) ? route($item['route']) : '#';
+                @endphp
+                <a href="{{ $href }}"
                    class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
                           {{ $active ? 'bg-white text-black' : 'text-white/50 hover:text-white hover:bg-white/8' }}">
                     <svg class="w-4 h-4 flex-shrink-0 {{ $active ? 'text-black' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
