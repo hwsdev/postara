@@ -92,8 +92,15 @@
 
         <div class="flex items-center gap-3">
             <button type="submit"
-                    class="bg-black text-white font-semibold px-6 py-2.5 rounded text-sm hover:opacity-90 transition-opacity">
-                {{ $scheduleForLater ? 'Schedule campaign' : 'Save as draft' }}
+                    wire:loading.attr="disabled"
+                    wire:target="save"
+                    class="inline-flex items-center gap-2 bg-black text-white font-semibold px-6 py-2.5 rounded text-sm hover:opacity-90 transition-opacity disabled:opacity-60">
+                <svg wire:loading wire:target="save" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+                <span wire:loading wire:target="save">{{ $scheduleForLater ? 'Scheduling…' : 'Saving…' }}</span>
+                <span wire:loading.remove wire:target="save">{{ $scheduleForLater ? 'Schedule campaign' : 'Save as draft' }}</span>
             </button>
             <a href="{{ route('campaigns.index') }}"
                class="border border-gray-200 font-medium px-6 py-2.5 rounded text-sm hover:bg-gray-50 transition-colors">

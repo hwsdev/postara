@@ -34,8 +34,15 @@
                 <input wire:model="newKeyName" type="text" placeholder="e.g. Production, Staging"
                        class="flex-1 px-4 py-2.5 border border-gray-200 rounded focus:outline-none focus:border-black text-sm transition-colors">
                 <button type="submit"
-                        class="bg-black text-white text-sm font-semibold px-4 py-2.5 rounded hover:opacity-90 transition-opacity">
-                    Generate
+                        wire:loading.attr="disabled"
+                        wire:target="create"
+                        class="inline-flex items-center gap-2 bg-black text-white text-sm font-semibold px-4 py-2.5 rounded hover:opacity-90 transition-opacity disabled:opacity-60">
+                    <svg wire:loading wire:target="create" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    <span wire:loading wire:target="create">Generating…</span>
+                    <span wire:loading.remove wire:target="create">Generate</span>
                 </button>
                 <button type="button" wire:click="$toggle('showCreateForm')"
                         class="border border-gray-200 text-sm font-medium px-4 py-2.5 rounded hover:bg-gray-50 transition-colors">

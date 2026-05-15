@@ -15,11 +15,34 @@ class ContactList extends Component
     public string $search = '';
     public $csvFile = null;
     public bool $showImport = false;
+    public bool $showAddForm = false;
     public string $importStatus = '';
+
+    // Manual add form
+    public string $newEmail = '';
+    public string $newName = '';
 
     public function updatingSearch(): void
     {
         $this->resetPage();
+    }
+
+    public function addContact(): void
+    {
+        $this->validate([
+            'newEmail' => ['required', 'email', 'max:255'],
+            'newName'  => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $workspaceId = session('current_workspace_id');
+
+        Contact::updateOrCreate(
+            ['workspace_id' => $workspaceId, 'email' => strtolower(trim($this->newEmail))],
+            ['name' => $this->newName ?: null, 'subscribed' => true]
+        );
+
+        $this->importStatus = "Contact {$this->newEmail} added.";
+        $this->reset(['newEmail', 'newName', 'showAddForm']);
     }
 
     public function importCsv(): void
