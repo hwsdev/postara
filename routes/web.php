@@ -48,6 +48,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/campaigns', fn () => view('dashboard.campaigns'))->name('campaigns.index');
     Route::get('/campaigns/create', fn () => view('dashboard.campaigns-create'))->name('campaigns.create');
 
+    // Templates
+    Route::get('/templates', fn () => view('dashboard.templates'))->name('templates.index');
+    Route::get('/templates/create', fn () => view('dashboard.templates-create'))->name('templates.create');
+    Route::get('/templates/{id}/edit', fn (int $id) => view('dashboard.templates-edit', ['templateId' => $id]))->name('templates.edit');
+
     // Webhooks
     Route::get('/webhooks', fn () => view('dashboard.webhooks'))->name('webhooks.index');
 

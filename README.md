@@ -300,13 +300,15 @@ $valid = hash_equals($expected, $_SERVER['HTTP_X_POSTARA_SIGNATURE']);
 
 | Page | Description |
 |---|---|
-| **Overview** | Sent today, sent this month, delivery rate, active campaigns |
+| **Overview** | 7-day send volume chart, campaign stats, delivery rate, recent emails |
 | **Campaigns** | Create, schedule, and send broadcast campaigns |
-| **Contacts** | Manage contacts, import via CSV, unsubscribe |
+| **Templates** | Create and edit HTML email templates with live preview |
+| **Contacts** | Manage contacts, import via CSV, add manually, organize into lists |
 | **Domains** | Add sending domains, verify DNS, auto-provision via Cloudflare |
 | **API Keys** | Generate and revoke API keys |
 | **Webhooks** | Configure webhook endpoints and rotate secrets |
-| **Suppression** | View and manage suppressed email addresses |
+| **Suppression** | View and remove suppressed email addresses |
+| **Settings** | Update mail transport config, Cloudflare token, send test email |
 
 ---
 
@@ -495,14 +497,18 @@ app/
 - [x] DKIM signing + domain verification
 - [x] Open / click tracking
 - [x] Webhook delivery with HMAC signing
-- [x] Contact list + CSV import
+- [x] Contact list + CSV import + manual add
+- [x] Contact lists management (create / delete lists)
 - [x] Campaign creation + scheduled send
-- [x] Suppression list
+- [x] Suppression list (view + remove)
 - [x] Setup wizard (no `.env` config needed)
 - [x] Cloudflare DNS auto-provision
 - [x] MailChannels transport
-- [ ] Template builder (GrapesJS + MJML)
-- [ ] Analytics dashboard with charts
+- [x] Template editor (HTML + live preview)
+- [x] Analytics dashboard (7-day chart, campaign stats)
+- [x] Settings page (update mail config + Cloudflare token post-setup)
+- [x] Mail test send from dashboard
+- [ ] Template builder with drag-drop (GrapesJS + MJML)
 - [ ] Magic link login
 - [ ] Advanced contact segmentation
 - [ ] A/B testing (v1.2)
