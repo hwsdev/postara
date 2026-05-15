@@ -49,7 +49,7 @@
                     @foreach ($addCandidates as $contact)
                         <label class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0">
                             <input type="checkbox"
-                                   wire:model="selectedContactIds"
+                                   wire:model.live="selectedContactIds"
                                    value="{{ $contact->id }}"
                                    class="rounded border-gray-300 text-black focus:ring-black">
                             <div class="flex-1 min-w-0">
@@ -74,7 +74,6 @@
                         <button type="button" wire:click="addSelected"
                                 wire:loading.attr="disabled"
                                 wire:target="addSelected"
-                                @disabled(empty($selectedContactIds))
                                 class="inline-flex items-center gap-2 bg-black text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-40">
                             <svg wire:loading wire:target="addSelected" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
@@ -82,7 +81,11 @@
                             </svg>
                             <span wire:loading wire:target="addSelected">Adding…</span>
                             <span wire:loading.remove wire:target="addSelected">
-                                Add {{ count($selectedContactIds) > 0 ? count($selectedContactIds) : '' }} to list
+                                Add
+                                @if (count($selectedContactIds) > 0)
+                                    {{ count($selectedContactIds) }}
+                                @endif
+                                to list
                             </span>
                         </button>
                     </div>
