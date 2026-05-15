@@ -14,25 +14,65 @@
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased">
 
-<div class="flex h-screen overflow-hidden">
+<div class="flex h-screen overflow-hidden"
+     x-data="{ sidebarOpen: window.innerWidth >= 1024 }"
+     @resize.window="sidebarOpen = window.innerWidth >= 1024 ? sidebarOpen : false">
+
+    {{-- ── Mobile backdrop ─────────────────────────────────────────── --}}
+    <div x-show="sidebarOpen"
+         x-transition:enter="transition-opacity ease-linear duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="sidebarOpen = false"
+         class="fixed inset-0 z-20 bg-black/50 lg:hidden"
+         style="display: none;">
+    </div>
 
     {{-- ── Sidebar ──────────────────────────────────────────────────── --}}
-    <aside class="w-56 bg-[#0A0A0A] text-white flex flex-col flex-shrink-0">
+    <aside
+        x-show="sidebarOpen || window.innerWidth >= 1024"
+        :class="sidebarOpen ? 'w-56' : 'w-14'"
+        class="bg-[#0A0A0A] text-white flex flex-col flex-shrink-0 transition-all duration-200 z-30
+               fixed inset-y-0 left-0 lg:relative lg:translate-x-0
+               -translate-x-full lg:translate-x-0"
+        :style="window.innerWidth < 1024 ? (sidebarOpen ? 'transform: translateX(0)' : 'transform: translateX(-100%)') : ''"
+        style="display: flex;"
+        x-cloak>
 
         {{-- Logo --}}
-        <div class="px-5 py-4 flex items-center gap-2.5">
+        <div class="px-3 py-4 flex items-center gap-2.5 overflow-hidden flex-shrink-0">
             <div class="w-6 h-6 bg-white rounded flex items-center justify-center flex-shrink-0">
                 <svg class="w-3.5 h-3.5 text-black" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M2 2h12v2H2V2zm0 4h8v2H2V6zm0 4h10v2H2v-2z"/>
                 </svg>
             </div>
-            <a href="/" class="text-white font-bold text-base tracking-tight">Postara</a>
+            <a href="/"
+               x-show="sidebarOpen"
+               x-transition:enter="transition-opacity duration-150"
+               x-transition:enter-start="opacity-0"
+               x-transition:enter-end="opacity-100"
+               x-transition:leave="transition-opacity duration-100"
+               x-transition:leave-start="opacity-100"
+               x-transition:leave-end="opacity-0"
+               class="text-white font-bold text-base tracking-tight whitespace-nowrap">
+                Postara
+            </a>
         </div>
 
         {{-- Workspace badge --}}
         @php $ws = \App\Models\Workspace::find(session('current_workspace_id')); @endphp
         @if ($ws)
-            <div class="mx-3 mb-3 px-3 py-2 bg-white/5 rounded-lg">
+            <div x-show="sidebarOpen"
+                 x-transition:enter="transition-opacity duration-150"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition-opacity duration-100"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="mx-3 mb-3 px-3 py-2 bg-white/5 rounded-lg overflow-hidden flex-shrink-0">
                 <p class="text-xs text-white/40 uppercase tracking-widest font-semibold mb-0.5">Workspace</p>
                 <p class="text-sm text-white/80 font-medium truncate">{{ $ws->name }}</p>
             </div>
@@ -57,46 +97,87 @@
             @foreach ($navItems as $item)
                 @php $active = request()->is($item['match']); @endphp
                 <a href="{{ $item['url'] }}"
-                   class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                   title="{{ $item['label'] }}"
+                   :class="sidebarOpen ? 'justify-start px-3' : 'justify-center px-0'"
+                   class="flex items-center gap-2.5 py-2 rounded-lg text-sm font-medium transition-all
                           {{ $active ? 'bg-white text-black' : 'text-white/50 hover:text-white hover:bg-white/8' }}">
                     <svg class="w-4 h-4 flex-shrink-0 {{ $active ? 'text-black' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="{{ $item['icon'] }}"/>
                     </svg>
-                    {{ $item['label'] }}
+                    <span x-show="sidebarOpen"
+                          x-transition:enter="transition-opacity duration-150"
+                          x-transition:enter-start="opacity-0"
+                          x-transition:enter-end="opacity-100"
+                          x-transition:leave="transition-opacity duration-100"
+                          x-transition:leave-start="opacity-100"
+                          x-transition:leave-end="opacity-0"
+                          class="whitespace-nowrap overflow-hidden">
+                        {{ $item['label'] }}
+                    </span>
                 </a>
             @endforeach
         </nav>
 
         {{-- User --}}
-        <div class="px-2 py-3 border-t border-white/8">
-            <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg">
+        <div class="px-2 py-3 border-t border-white/8 flex-shrink-0">
+            <div :class="sidebarOpen ? 'px-3' : 'justify-center px-0'"
+                 class="flex items-center gap-2.5 py-2 rounded-lg">
                 <div class="w-7 h-7 rounded-full bg-white/15 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                 </div>
-                <div class="flex-1 min-w-0">
+                <div x-show="sidebarOpen"
+                     x-transition:enter="transition-opacity duration-150"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100"
+                     x-transition:leave="transition-opacity duration-100"
+                     x-transition:leave-start="opacity-100"
+                     x-transition:leave-end="opacity-0"
+                     class="flex-1 min-w-0">
                     <p class="text-xs font-semibold text-white truncate">{{ auth()->user()->name }}</p>
                     <p class="text-xs text-white/35 truncate">{{ auth()->user()->email }}</p>
                 </div>
             </div>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit"
-                        class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-white/40 hover:text-white hover:bg-white/8 transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button type="button"
+                        title="Sign out"
+                        :class="sidebarOpen ? 'justify-start px-3' : 'justify-center px-0'"
+                        onclick="this.closest('form').submit()"
+                        class="w-full flex items-center gap-2.5 py-2 rounded-lg text-xs text-white/40 hover:text-white hover:bg-white/8 transition-all">
+                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                     </svg>
-                    Sign out
+                    <span x-show="sidebarOpen"
+                          x-transition:enter="transition-opacity duration-150"
+                          x-transition:enter-start="opacity-0"
+                          x-transition:enter-end="opacity-100"
+                          x-transition:leave="transition-opacity duration-100"
+                          x-transition:leave-start="opacity-100"
+                          x-transition:leave-end="opacity-0"
+                          class="whitespace-nowrap">
+                        Sign out
+                    </span>
                 </button>
             </form>
         </div>
     </aside>
 
     {{-- ── Main ─────────────────────────────────────────────────────── --}}
-    <main class="flex-1 overflow-y-auto flex flex-col min-w-0">
+    <main class="flex-1 overflow-y-auto flex flex-col min-w-0 lg:ml-0"
+          :class="window.innerWidth < 1024 ? 'ml-0' : ''">
 
         {{-- Top bar --}}
-        <header class="bg-white border-b border-gray-100 px-7 py-4 flex items-center justify-between sticky top-0 z-10 flex-shrink-0">
-            <h1 class="text-lg font-bold tracking-tight">{{ $title ?? 'Dashboard' }}</h1>
+        <header class="bg-white border-b border-gray-100 px-5 py-4 flex items-center justify-between sticky top-0 z-10 flex-shrink-0">
+            <div class="flex items-center gap-1">
+                {{-- Hamburger toggle --}}
+                <button @click="sidebarOpen = !sidebarOpen"
+                        class="mr-3 p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+                <h1 class="text-lg font-bold tracking-tight">{{ $title ?? 'Dashboard' }}</h1>
+            </div>
             @isset($actions)
                 <div class="flex items-center gap-2">{{ $actions }}</div>
             @endisset

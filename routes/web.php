@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Dashboard\AuthController;
 use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\Dashboard\TemplateController;
 use App\Http\Controllers\Dashboard\TrackingController;
 use Illuminate\Support\Facades\Route;
 
@@ -50,8 +51,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Templates
     Route::get('/templates', fn () => view('dashboard.templates'))->name('templates.index');
-    Route::get('/templates/create', fn () => view('dashboard.templates-create'))->name('templates.create');
-    Route::get('/templates/{id}/edit', fn (int $id) => view('dashboard.templates-edit', ['templateId' => $id]))->name('templates.edit');
+    Route::get('/templates/create', [TemplateController::class, 'create'])->name('templates.create');
+    Route::get('/templates/{id}/edit', [TemplateController::class, 'edit'])->name('templates.edit');
 
     // Webhooks
     Route::get('/webhooks', fn () => view('dashboard.webhooks'))->name('webhooks.index');
