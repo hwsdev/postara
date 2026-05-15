@@ -72,7 +72,7 @@ Nginx config is at `docker/nginx/default.conf`. PHP-FPM config at `docker/php-fp
 
 Open `http://localhost` → setup wizard.
 
-### Option C — Local development
+### Option D — Local development
 
 ```bash
 git clone https://github.com/hwsdev/postara.git
