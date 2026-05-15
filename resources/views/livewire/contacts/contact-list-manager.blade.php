@@ -75,7 +75,10 @@
                 <tbody class="divide-y divide-gray-100">
                     @foreach ($lists as $list)
                         <tr class="hover:bg-gray-50/50 transition-colors">
-                            <td class="px-5 py-3.5 font-medium">{{ $list->name }}</td>
+                            <td class="px-5 py-3.5">
+                                <a href="/contacts/lists/{{ $list->id }}"
+                                   class="font-medium hover:underline">{{ $list->name }}</a>
+                            </td>
                             <td class="px-5 py-3.5 text-gray-400 text-xs max-w-xs truncate">{{ $list->description ?? '—' }}</td>
                             <td class="px-5 py-3.5">
                                 <span class="inline-flex items-center gap-1 text-xs font-semibold text-gray-700 bg-gray-100 px-2.5 py-1 rounded-full">
@@ -84,11 +87,17 @@
                             </td>
                             <td class="px-5 py-3.5 text-gray-400 text-xs">{{ $list->created_at->format('M d, Y') }}</td>
                             <td class="px-5 py-3.5 text-right">
-                                <button wire:click="delete({{ $list->id }})"
-                                        wire:confirm="Delete list &quot;{{ $list->name }}&quot;? This won't delete the contacts themselves."
-                                        class="text-xs font-medium text-gray-400 hover:text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors">
-                                    Delete
-                                </button>
+                                <div class="flex items-center justify-end gap-1">
+                                    <a href="/contacts/lists/{{ $list->id }}"
+                                       class="text-xs font-medium text-gray-500 hover:text-black px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+                                        Manage
+                                    </a>
+                                    <button wire:click="delete({{ $list->id }})"
+                                            wire:confirm="Delete list &quot;{{ $list->name }}&quot;? This won't delete the contacts themselves."
+                                            class="text-xs font-medium text-gray-400 hover:text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors">
+                                        Delete
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     @endforeach

@@ -44,6 +44,7 @@ Route::middleware(['auth'])->group(function () {
     // Contacts
     Route::get('/contacts', fn () => view('dashboard.contacts'))->name('contacts.index');
     Route::get('/contacts/lists', fn () => view('dashboard.contact-lists'))->name('contacts.lists');
+    Route::get('/contacts/lists/{id}', fn (int $id) => view('dashboard.contact-list-detail', ['listId' => $id]))->name('contacts.lists.detail');
 
     // Campaigns
     Route::get('/campaigns', fn () => view('dashboard.campaigns'))->name('campaigns.index');
