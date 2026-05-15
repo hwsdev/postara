@@ -45,11 +45,18 @@ class ContactListDetail extends Component
         $list = ContactList::where('workspace_id', session('current_workspace_id'))
             ->findOrFail($this->listId);
 
+        // Cast to int — checkbox values come as strings from Livewire
+        $requestedIds = array_map('intval', $this->selectedContactIds);
+
         // Only attach contacts that belong to this workspace
         $validIds = Contact::where('workspace_id', session('current_workspace_id'))
-            ->whereIn('id', $this->selectedContactIds)
+            ->whereIn('id', $requestedIds)
             ->pluck('id')
             ->toArray();
+
+        if (empty($validIds)) {
+            return;
+        }
 
         $list->contacts()->syncWithoutDetaching($validIds);
 
@@ -83,7 +90,7 @@ class ContactListDetail extends Component
         // Contacts NOT yet in this list (for the add panel)
         $addCandidates = collect();
         if ($this->showAddPanel) {
-            $existingIds = $list->contacts()->pluck('contacts.id');
+            $existingIds = $list->contacts()->pluck('contacts.id')->toArray();
 
             $addCandidates = Contact::where('workspace_id', session('current_workspace_id'))
                 ->whereNotIn('id', $existingIds)
@@ -91,7 +98,8 @@ class ContactListDetail extends Component
                     $q->where('email', 'like', "%{$this->addSearch}%")
                         ->orWhere('name', 'like', "%{$this->addSearch}%");
                 }))
-                ->limit(50)
+                ->orderBy('email')
+                ->limit(100)
                 ->get();
         }
 

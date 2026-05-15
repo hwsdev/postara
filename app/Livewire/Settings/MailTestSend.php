@@ -54,6 +54,11 @@ class MailTestSend extends Component
                 'to'           => $toEmail,
             ]);
 
+            // Warn if config looks like default/unconfigured
+            if ($mailerName === 'smtp' && (string) Setting::get('mail_host') === '127.0.0.1') {
+                $this->log('info', '⚠ WARNING: mail_host is 127.0.0.1 — this is Postfix/local mode. If you want to use Brevo/SMTP relay, go to Settings and update the mail transport config, then Save.');
+            }
+
             if (empty($fromAddr)) {
                 throw new \RuntimeException('From address is not configured. Go to Settings and set a From address.');
             }
