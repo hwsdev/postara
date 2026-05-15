@@ -47,11 +47,11 @@ class MailTestSend extends Component
             // This bypasses Laravel's cached Mail singleton which still uses .env config.
             $symfonyTransport = $this->buildTransport($mailerName);
 
-            // Wrap in a fresh Laravel Mailer instance
+            // Wrap in a fresh Laravel Mailer instance — pass transport directly
             $mailer = new Mailer(
                 'postara-test',
                 app('view'),
-                new \Symfony\Component\Mailer\Mailer($symfonyTransport),
+                $symfonyTransport,
                 app('events')
             );
 
