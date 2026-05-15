@@ -52,8 +52,13 @@ RUN pnpm run build 2>/dev/null || npm run build
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache \
     && chmod -R 775 /app/storage /app/bootstrap/cache
 
+# Entrypoint — clears stale cache and runs migrations on every container start
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Expose port
 EXPOSE 8000
 
 # Default: serve via FrankenPHP
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["frankenphp", "run", "--config", "/app/docker/frankenphp/Caddyfile"]
