@@ -88,7 +88,7 @@
         <div class="bg-white border border-gray-100 rounded-xl overflow-hidden mb-6">
             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                 <h2 class="font-semibold text-sm">Recent campaigns</h2>
-                <a href="{{ route('campaigns.index') }}" class="text-xs text-gray-400 hover:text-black transition-colors">View all →</a>
+                <a href="/campaigns" class="text-xs text-gray-400 hover:text-black transition-colors">View all →</a>
             </div>
             <table class="w-full text-sm">
                 <thead>

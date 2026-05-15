@@ -103,7 +103,7 @@
                     <span wire:loading wire:target="save">Saving…</span>
                     <span wire:loading.remove wire:target="save">{{ $templateId ? 'Save changes' : 'Create template' }}</span>
                 </button>
-                <a href="{{ route('templates.index') }}"
+                <a href="/templates"
                    class="border border-gray-200 text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-gray-50 transition-colors">
                     Cancel
                 </a>

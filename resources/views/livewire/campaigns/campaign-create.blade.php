@@ -102,7 +102,7 @@
                 <span wire:loading wire:target="save">{{ $scheduleForLater ? 'Scheduling…' : 'Saving…' }}</span>
                 <span wire:loading.remove wire:target="save">{{ $scheduleForLater ? 'Schedule campaign' : 'Save as draft' }}</span>
             </button>
-            <a href="{{ route('campaigns.index') }}"
+            <a href="/campaigns"
                class="border border-gray-200 font-medium px-6 py-2.5 rounded text-sm hover:bg-gray-50 transition-colors">
                 Cancel
             </a>

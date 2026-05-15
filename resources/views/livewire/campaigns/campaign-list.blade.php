@@ -18,7 +18,8 @@
         @if ($campaigns->isEmpty())
             <div class="px-6 py-12 text-center text-gray-400 text-sm">
                 No campaigns yet.
-                <a href="{{ route('campaigns.create') }}" class="text-black font-medium hover:underline">Create your first campaign</a>
+            <a href="/campaigns/create"
+               class="text-black font-medium hover:underline">Create your first campaign</a>
             </div>
         @else
             <table class="w-full text-sm">

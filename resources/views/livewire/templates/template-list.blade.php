@@ -4,7 +4,7 @@
         <div>
             <p class="text-sm text-gray-500 mt-0.5">Reusable HTML email templates for transactional and campaign emails.</p>
         </div>
-        <a href="{{ route('templates.create') }}"
+        <a href="/templates/create"
            class="bg-black text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
             + New template
         </a>
@@ -20,7 +20,7 @@
                 </div>
                 <p class="text-sm font-medium text-gray-700">No templates yet</p>
                 <p class="text-xs text-gray-400 mt-1">Create a template to use in campaigns or the transactional API.</p>
-                <a href="{{ route('templates.create') }}"
+                <a href="/templates/create"
                    class="inline-block mt-4 bg-black text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
                     Create your first template
                 </a>
@@ -53,7 +53,7 @@
                             <td class="px-5 py-3.5 text-gray-400 text-xs">{{ $template->updated_at->diffForHumans() }}</td>
                             <td class="px-5 py-3.5 text-right">
                                 <div class="flex items-center justify-end gap-1">
-                                    <a href="{{ route('templates.edit', $template->id) }}"
+                                    <a href="/templates/{{ $template->id }}/edit"
                                        class="text-xs font-medium text-gray-500 hover:text-black px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">
                                         Edit
                                     </a>
