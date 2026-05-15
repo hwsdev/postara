@@ -1,17 +1,22 @@
 <div
     x-data="{
         preview: false,
+        togglePreview() {
+            this.preview = !this.preview;
+            if (this.preview) this.$nextTick(() => this.updatePreview());
+        },
         updatePreview() {
             const iframe = document.getElementById('template-preview');
-            if (iframe) {
-                const doc = iframe.contentDocument || iframe.contentWindow.document;
-                doc.open();
-                doc.write($wire.html);
-                doc.close();
-            }
+            if (!iframe) return;
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            doc.open();
+            doc.write(this.$wire.html);
+            doc.close();
+        },
+        onHtmlChange() {
+            if (this.preview) this.updatePreview();
         }
     }"
-    x-init="$watch('preview', val => { if (val) $nextTick(() => updatePreview()) })"
 >
     {{-- Saved flash --}}
     <div
@@ -37,7 +42,9 @@
                 <h3 class="font-semibold text-sm border-b border-gray-100 pb-3">Template details</h3>
 
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1.5">Template name <span class="text-red-500">*</span></label>
+                    <label class="block text-xs font-medium text-gray-600 mb-1.5">
+                        Template name <span class="text-red-500">*</span>
+                    </label>
                     <input wire:model="name" type="text" placeholder="e.g. Welcome email"
                            class="w-full px-3.5 py-2.5 border rounded-lg text-sm focus:outline-none transition-colors
                                   {{ $errors->has('name') ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-black' }}">
@@ -45,7 +52,9 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1.5">Default subject <span class="text-gray-400 font-normal">(optional)</span></label>
+                    <label class="block text-xs font-medium text-gray-600 mb-1.5">
+                        Default subject <span class="text-gray-400 font-normal">(optional)</span>
+                    </label>
                     <input wire:model="subject" type="text" placeholder="Your email subject"
                            class="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-black transition-colors">
                 </div>
@@ -72,16 +81,19 @@
                 <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
                     <h3 class="font-semibold text-sm">HTML</h3>
                     <div class="flex items-center gap-2">
-                        <span class="text-xs text-gray-400">Variables: <code class="font-mono bg-gray-100 px-1 rounded">{{ '{{ $name }}' }}</code></span>
-                        <button type="button" x-on:click="preview = !preview"
+                        <span class="text-xs text-gray-400">
+                            Variables: <code class="font-mono bg-gray-100 px-1 rounded">@{{ $name }}</code>
+                        </span>
+                        <button type="button" @click="togglePreview()"
                                 class="text-xs font-medium text-gray-500 hover:text-black px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-                            <span x-text="preview ? 'Hide preview' : 'Preview'"></span>
+                            <span x-show="!preview">Preview</span>
+                            <span x-show="preview">Hide preview</span>
                         </button>
                     </div>
                 </div>
                 <textarea
                     wire:model.lazy="html"
-                    x-on:change="if (preview) updatePreview()"
+                    x-on:change="onHtmlChange()"
                     rows="24"
                     placeholder="Paste or write your HTML email here..."
                     class="w-full px-4 py-3 text-xs font-mono text-gray-800 bg-gray-50 focus:outline-none focus:bg-white transition-colors resize-none border-0"
@@ -101,7 +113,9 @@
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                     </svg>
                     <span wire:loading wire:target="save">Saving…</span>
-                    <span wire:loading.remove wire:target="save">{{ $templateId ? 'Save changes' : 'Create template' }}</span>
+                    <span wire:loading.remove wire:target="save">
+                        {{ $templateId ? 'Save changes' : 'Create template' }}
+                    </span>
                 </button>
                 <a href="/templates"
                    class="border border-gray-200 text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-gray-50 transition-colors">
@@ -110,12 +124,15 @@
             </div>
         </div>
 
-        {{-- Right: preview --}}
-        <div x-show="preview" x-transition class="hidden lg:block">
+        {{-- Right: preview panel --}}
+        <div x-show="preview" x-transition>
             <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm sticky top-6">
                 <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
                     <h3 class="font-semibold text-sm">Preview</h3>
-                    <span class="text-xs text-gray-400">Rendered HTML</span>
+                    <button type="button" @click="updatePreview()"
+                            class="text-xs text-gray-400 hover:text-black transition-colors">
+                        Refresh
+                    </button>
                 </div>
                 <iframe
                     id="template-preview"
@@ -124,14 +141,6 @@
                     sandbox="allow-same-origin"
                 ></iframe>
             </div>
-        </div>
-
-        {{-- Mobile preview toggle hint --}}
-        <div x-show="!preview" class="lg:hidden text-center py-4">
-            <button type="button" x-on:click="preview = true"
-                    class="text-sm text-gray-400 hover:text-black transition-colors">
-                Show preview →
-            </button>
         </div>
 
     </div>
