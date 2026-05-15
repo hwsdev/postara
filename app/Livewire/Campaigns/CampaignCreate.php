@@ -20,6 +20,13 @@ class CampaignCreate extends Component
     public string $scheduledAt = '';
     public bool $scheduleForLater = false;
 
+    public function mount(): void
+    {
+        // Pre-fill sender from saved settings
+        $this->fromName  = (string) \App\Models\Setting::get('mail_from_name', '');
+        $this->fromEmail = (string) \App\Models\Setting::get('mail_from_address', '');
+    }
+
     protected function rules(): array
     {
         return [
@@ -53,7 +60,7 @@ class CampaignCreate extends Component
             'scheduled_at'   => $this->scheduleForLater ? $this->scheduledAt : null,
         ]);
 
-        $this->redirect(route('campaigns.index'));
+        $this->redirect('/campaigns');
     }
 
     public function render(): View
@@ -62,7 +69,7 @@ class CampaignCreate extends Component
 
         return view('livewire.campaigns.campaign-create', [
             'templates'    => Template::where('workspace_id', $workspaceId)->get(),
-            'contactLists' => ContactList::where('workspace_id', $workspaceId)->get(),
+            'contactLists' => ContactList::where('workspace_id', $workspaceId)->withCount('contacts')->get(),
         ]);
     }
 }

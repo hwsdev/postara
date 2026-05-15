@@ -49,25 +49,39 @@
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Contact list</label>
-                <select wire:model="contactListId"
-                        class="w-full px-4 py-2.5 border border-gray-200 rounded focus:outline-none focus:border-black text-sm transition-colors bg-white">
-                    <option value="">Select a list...</option>
-                    @foreach ($contactLists as $list)
-                        <option value="{{ $list->id }}">{{ $list->name }}</option>
-                    @endforeach
-                </select>
+                @if ($contactLists->isEmpty())
+                    <div class="flex items-center justify-between px-4 py-3 bg-amber-50 border border-amber-200 rounded text-sm text-amber-800">
+                        <span>No contact lists yet.</span>
+                        <a href="/contacts/lists" class="font-semibold underline hover:no-underline">Create a list →</a>
+                    </div>
+                @else
+                    <select wire:model="contactListId"
+                            class="w-full px-4 py-2.5 border border-gray-200 rounded focus:outline-none focus:border-black text-sm transition-colors bg-white">
+                        <option value="">Select a list...</option>
+                        @foreach ($contactLists as $list)
+                            <option value="{{ $list->id }}">{{ $list->name }}{{ $list->contacts_count !== null ? ' ('.$list->contacts_count.' contacts)' : '' }}</option>
+                        @endforeach
+                    </select>
+                @endif
                 @error('contactListId') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Template</label>
-                <select wire:model="templateId"
-                        class="w-full px-4 py-2.5 border border-gray-200 rounded focus:outline-none focus:border-black text-sm transition-colors bg-white">
-                    <option value="">Select a template...</option>
-                    @foreach ($templates as $template)
-                        <option value="{{ $template->id }}">{{ $template->name }}</option>
-                    @endforeach
-                </select>
+                @if ($templates->isEmpty())
+                    <div class="flex items-center justify-between px-4 py-3 bg-amber-50 border border-amber-200 rounded text-sm text-amber-800">
+                        <span>No templates yet.</span>
+                        <a href="/templates/create" class="font-semibold underline hover:no-underline">Create a template →</a>
+                    </div>
+                @else
+                    <select wire:model="templateId"
+                            class="w-full px-4 py-2.5 border border-gray-200 rounded focus:outline-none focus:border-black text-sm transition-colors bg-white">
+                        <option value="">Select a template...</option>
+                        @foreach ($templates as $template)
+                            <option value="{{ $template->id }}">{{ $template->name }} ({{ $template->type }})</option>
+                        @endforeach
+                    </select>
+                @endif
                 @error('templateId') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
         </div>
