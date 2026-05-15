@@ -1,4 +1,4 @@
-@props(['title' => null, 'actions' => null])
+@props(['title' => null, 'actions' => null, 'fullscreen' => false])
 
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -103,7 +103,7 @@
         </header>
 
         {{-- Content --}}
-        <div class="flex-1 px-7 py-6">
+        <div class="{{ $fullscreen ? 'flex-1 px-4 py-4 overflow-hidden' : 'flex-1 px-7 py-6' }}">
             @if (session('success'))
                 <div class="mb-5 flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-xl">
                     <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,5 +119,6 @@
 </div>
 
 @livewireScripts
+@stack('scripts')
 </body>
 </html>

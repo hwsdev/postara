@@ -1,4 +1,3 @@
-<x-app-layout>
-    <x-slot name="title">Edit Template</x-slot>
+<x-app-layout title="Edit Template" :fullscreen="true">
     <livewire:templates.template-editor :template-id="$templateId" />
 </x-app-layout>
