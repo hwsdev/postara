@@ -157,19 +157,13 @@ class SetupWizard extends Component
 
         // SMTP / Postfix
         try {
-            // $tls = true  → implicit SSL (port 465)
-            // $tls = false → plain + STARTTLS negotiation (port 587/25)
-            // $tls = null  → auto-detect by port
-            $tls = match ($cfg['encryption']) {
-                'ssl'  => true,
-                'tls'  => false,
-                default => null,
-            };
+            // Port 465 = implicit SSL. Port 587/25 = STARTTLS (connect plain, upgrade).
+            $implicitTls = ($cfg['encryption'] === 'ssl' || (int) $cfg['port'] === 465);
 
             $transport = new \Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport(
                 $cfg['host'],
                 (int) $cfg['port'],
-                $tls
+                $implicitTls
             );
 
             if (! empty($cfg['username'])) {
@@ -177,7 +171,25 @@ class SetupWizard extends Component
                 $transport->setPassword($cfg['password']);
             }
 
-            $transport->start();
+        // Disable peer verification for self-hosted / Postfix (self-signed certs)
+        $isLocal = empty($cfg['username'])
+            || in_array($cfg['host'], ['127.0.0.1', 'localhost', 'postfix'])
+            || str_starts_with($cfg['host'], '192.168.')
+            || str_starts_with($cfg['host'], '10.');
+
+        if ($isLocal) {
+            /** @var \Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream $stream */
+            $stream = $transport->getStream();
+            $stream->setStreamOptions([
+                'ssl' => [
+                    'verify_peer'       => false,
+                    'verify_peer_name'  => false,
+                    'allow_self_signed' => true,
+                ],
+            ]);
+        }
+
+        $transport->start();
             $this->mailTestResult = 'success';
         } catch (\Exception $e) {
             $this->mailTestResult = 'error:' . $e->getMessage();

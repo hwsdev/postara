@@ -97,21 +97,35 @@ class MailTestSend extends Component
         $password   = (string) Setting::get('mail_password', '');
         $encryption = (string) Setting::get('mail_encryption', '');
 
-        // Symfony EsmtpTransport $tls parameter:
-        //   true  = implicit SSL (port 465, ssl:// prefix)
-        //   false = plain / STARTTLS negotiation (port 587 or 25)
-        //   null  = auto-detect (true if port 465, false otherwise)
-        $tls = match ($encryption) {
-            'ssl'  => true,   // port 465 — implicit SSL
-            'tls'  => false,  // port 587 — STARTTLS (negotiated after connect)
-            default => null,  // auto-detect
-        };
+        // Port 465 = implicit SSL (connect with TLS from the start)
+        // Port 587 / 25 = STARTTLS or plain (connect plain, upgrade with STARTTLS)
+        // EsmtpTransport $tls=true means implicit SSL — only use for port 465
+        $implicitTls = ($encryption === 'ssl' || $port === 465);
 
-        $transport = new EsmtpTransport($host, $port, $tls);
+        $transport = new EsmtpTransport($host, $port, $implicitTls);
 
         if (! empty($username)) {
             $transport->setUsername($username);
             $transport->setPassword($password);
+        }
+
+        // For self-hosted / Postfix with self-signed cert, disable peer verification
+        // This applies when: no username (Postfix mode) OR host is localhost/127.x
+        $isLocalOrSelfHosted = empty($username)
+            || in_array($host, ['127.0.0.1', 'localhost', 'postfix'])
+            || str_starts_with($host, '192.168.')
+            || str_starts_with($host, '10.');
+
+        if ($isLocalOrSelfHosted) {
+            /** @var \Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream $stream */
+            $stream = $transport->getStream();
+            $stream->setStreamOptions([
+                'ssl' => [
+                    'verify_peer'       => false,
+                    'verify_peer_name'  => false,
+                    'allow_self_signed' => true,
+                ],
+            ]);
         }
 
         return $transport;
