@@ -11,7 +11,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 
 class SendEmailJob implements ShouldQueue
 {
@@ -42,9 +41,23 @@ class SendEmailJob implements ShouldQueue
             // Build and send via Laravel Mail
             $mailable = new \App\Mail\TransactionalMail($email, $html);
 
-            Mail::to($email->to)->send($mailable);
+            // Add CC/BCC if present
+            $mailer = Mail::to($email->to);
 
-            $messageId = Str::uuid().'@postara';
+            if (! empty($email->cc)) {
+                $mailer = $mailer->cc($email->cc);
+            }
+
+            if (! empty($email->bcc)) {
+                $mailer = $mailer->bcc($email->bcc);
+            }
+
+            $mailer->send($mailable);
+
+            // Use the message ID assigned by the mailer if available
+            $messageId = $mailable->getSymfonyMessage()?->getHeaders()->get('Message-ID')?->getBodyAsString()
+                ?? (string) \Illuminate\Support\Str::uuid().'@postara';
+
             $email->update([
                 'status' => 'delivered',
                 'message_id' => $messageId,
@@ -59,6 +72,12 @@ class SendEmailJob implements ShouldQueue
             );
         } catch (\Exception $e) {
             $email->update(['status' => 'failed']);
+
+            $webhookService->dispatch(
+                $email->workspace,
+                'email.failed',
+                $webhookService->buildEmailPayload($email, 'email.failed', ['error' => $e->getMessage()])
+            );
 
             throw $e;
         }

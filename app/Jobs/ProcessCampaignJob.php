@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Models\Campaign;
-use App\Models\Contact;
 use App\Models\Email;
 use App\Services\EmailService;
 use Illuminate\Bus\Queueable;
@@ -26,9 +25,9 @@ class ProcessCampaignJob implements ShouldQueue
 
     public function handle(EmailService $emailService): void
     {
-        $campaign = $this->campaign;
+        $campaign = $this->campaign->fresh();
 
-        if (! in_array($campaign->status, ['scheduled', 'sending'])) {
+        if (! in_array($campaign->status, ['scheduled', 'sending', 'draft'])) {
             return;
         }
 
@@ -51,28 +50,33 @@ class ProcessCampaignJob implements ShouldQueue
             ->whereNotIn('email', $suppressedEmails)
             ->cursor();
 
+        $dispatched = 0;
+
         foreach ($contacts as $contact) {
             $html = $emailService->renderTemplate($template, [
-                'name' => $contact->name ?? $contact->email,
+                'name'  => $contact->name ?? $contact->email,
                 'email' => $contact->email,
             ]);
 
             $email = Email::create([
                 'workspace_id' => $campaign->workspace_id,
-                'from' => "{$campaign->from_name} <{$campaign->from_email}>",
-                'to' => [$contact->email],
-                'subject' => $campaign->subject,
-                'html' => $html,
-                'template_id' => $template->id,
-                'campaign_id' => $campaign->id,
-                'status' => 'queued',
+                'from'         => "{$campaign->from_name} <{$campaign->from_email}>",
+                'to'           => [$contact->email],
+                'subject'      => $campaign->subject,
+                'html'         => $html,
+                'template_id'  => $template->id,
+                'campaign_id'  => $campaign->id,
+                'status'       => 'queued',
             ]);
 
             SendEmailJob::dispatch($email);
+            $dispatched++;
         }
 
+        // Only mark sent after all jobs are dispatched
+        // Actual delivery status is tracked per-email via SendEmailJob
         $campaign->update([
-            'status' => 'sent',
+            'status'  => $dispatched > 0 ? 'sent' : 'cancelled',
             'sent_at' => now(),
         ]);
     }

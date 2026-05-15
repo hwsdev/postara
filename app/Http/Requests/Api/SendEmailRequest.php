@@ -14,7 +14,7 @@ class SendEmailRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'from'            => ['required', 'email'],
+            'from'            => ['required', 'string', 'max:320'],
             'to'              => ['required', 'array', 'min:1'],
             'to.*'            => ['required', 'email'],
             'cc'              => ['sometimes', 'array'],

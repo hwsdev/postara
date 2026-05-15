@@ -97,6 +97,9 @@ class GeneralSettings extends Component
         ]);
 
         $this->saved = true;
+
+        // Restart queue workers so they pick up the new mail config
+        \Illuminate\Support\Facades\Artisan::call('queue:restart');
     }
 
     public function updatedMailMode(): void

@@ -29,7 +29,6 @@ class CampaignList extends Component
             return;
         }
 
-        $campaign->update(['status' => 'sending']);
         ProcessCampaignJob::dispatch($campaign);
 
         $this->dispatch('campaign-sent');
