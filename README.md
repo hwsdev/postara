@@ -37,7 +37,7 @@ Postara fills the gap between transactional email APIs (Resend, Mailersend) and 
 3. Deploy — Coolify handles HTTPS via Traefik automatically
 4. Open your app URL → the setup wizard runs on first visit
 
-### Option B — Plain Docker Compose
+### Option B — Plain Docker Compose (FrankenPHP + Caddy)
 
 ```bash
 # Clone
@@ -54,6 +54,21 @@ docker compose -f docker-compose.standalone.yml up -d
 # Run migrations
 docker compose -f docker-compose.standalone.yml exec app php artisan migrate --force
 ```
+
+### Option C — Nginx + PHP-FPM
+
+```bash
+git clone https://github.com/hwsdev/postara.git
+cd postara
+
+cp .env.example .env
+# Edit .env — set APP_KEY, POSTGRES_PASSWORD, APP_URL
+
+docker compose -f docker-compose.nginx.yml up -d
+docker compose -f docker-compose.nginx.yml exec app php artisan migrate --force
+```
+
+Nginx config is at `docker/nginx/default.conf`. PHP-FPM config at `docker/php-fpm/`.
 
 Open `http://localhost` → setup wizard.
 

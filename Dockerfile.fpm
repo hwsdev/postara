@@ -1,0 +1,80 @@
+FROM php:8.3-fpm-alpine
+
+LABEL org.opencontainers.image.source="https://github.com/hwsdev/postara"
+LABEL org.opencontainers.image.description="Postara — PHP-FPM image for Nginx deployment"
+LABEL org.opencontainers.image.licenses="AGPL-3.0"
+
+# System dependencies
+RUN apk add --no-cache \
+    bash \
+    curl \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    libwebp-dev \
+    freetype-dev \
+    libzip-dev \
+    icu-dev \
+    oniguruma-dev \
+    postgresql-dev \
+    nodejs \
+    npm
+
+# PHP extensions
+RUN docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg \
+        --with-webp \
+    && docker-php-ext-install -j$(nproc) \
+        pdo_pgsql \
+        pdo_mysql \
+        intl \
+        opcache \
+        pcntl \
+        zip \
+        gd \
+        bcmath \
+        exif
+
+# Redis extension via PECL
+RUN pecl install redis && docker-php-ext-enable redis
+
+# PHP-FPM config
+COPY docker/php-fpm/php.ini /usr/local/etc/php/conf.d/postara.ini
+COPY docker/php-fpm/www.conf /usr/local/etc/php-fpm.d/www.conf
+
+# Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# pnpm
+RUN npm install -g pnpm@latest
+
+WORKDIR /app
+
+# Install PHP dependencies (cached layer)
+COPY composer.json composer.lock ./
+RUN composer install \
+    --no-dev \
+    --no-scripts \
+    --no-autoloader \
+    --prefer-dist
+
+# Install JS dependencies (cached layer)
+COPY package.json pnpm-lock.yaml* package-lock.json* ./
+RUN pnpm install --frozen-lockfile 2>/dev/null || npm ci --ignore-scripts
+
+# Copy application
+COPY . .
+
+# Optimise
+RUN composer dump-autoload --optimize --no-dev
+
+# Build assets
+RUN pnpm run build 2>/dev/null || npm run build
+
+# Permissions
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache \
+    && chmod -R 775 /app/storage /app/bootstrap/cache
+
+EXPOSE 9000
+
+CMD ["php-fpm"]
