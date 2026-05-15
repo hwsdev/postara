@@ -3,21 +3,24 @@
 namespace App\Livewire\Settings;
 
 use App\Models\Setting;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Mail\Mailer;
 use Illuminate\View\View;
 use Livewire\Component;
+use Symfony\Component\Mailer\Transport\NullTransport;
+use Symfony\Component\Mailer\Transport\TransportInterface;
+use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 
 class MailTestSend extends Component
 {
     public string $toEmail = '';
-    public string $toName = '';
+    public string $toName  = '';
     public ?string $result = null;
 
     public function mount(): void
     {
-        /** @var \App\Models\User $user */
+        /** @var \App\Models\User|null $user */
         $user = auth()->user();
-        if ($user) {
+        if ($user instanceof \App\Models\User) {
             $this->toEmail = $user->email;
             $this->toName  = $user->name;
         }
@@ -33,39 +36,76 @@ class MailTestSend extends Component
         $this->result = null;
 
         try {
-            // Apply saved mail config at runtime
-            $mailer   = Setting::get('mail_mailer', config('mail.default'));
-            $fromAddr = Setting::get('mail_from_address', config('mail.from.address'));
-            $fromName = Setting::get('mail_from_name', config('mail.from.name'));
+            $mailerName = Setting::get('mail_mailer', 'smtp');
+            $fromAddr   = (string) Setting::get('mail_from_address', '');
+            $fromName   = (string) Setting::get('mail_from_name', 'Postara');
+            $appName    = (string) Setting::get('app_name', config('app.name', 'Postara'));
+            $toEmail    = $this->toEmail;
+            $toName     = $this->toName ?: $this->toEmail;
 
-            config([
-                'mail.default'                 => $mailer,
-                'mail.mailers.smtp.host'       => Setting::get('mail_host', config('mail.mailers.smtp.host')),
-                'mail.mailers.smtp.port'       => Setting::get('mail_port', config('mail.mailers.smtp.port')),
-                'mail.mailers.smtp.username'   => Setting::get('mail_username', config('mail.mailers.smtp.username')),
-                'mail.mailers.smtp.password'   => Setting::get('mail_password', config('mail.mailers.smtp.password')),
-                'mail.mailers.smtp.encryption' => Setting::get('mail_encryption', config('mail.mailers.smtp.encryption')),
-                'mail.from.address'            => $fromAddr,
-                'mail.from.name'               => $fromName,
-            ]);
+            // Build a fresh Symfony transport from DB settings.
+            // This bypasses Laravel's cached Mail singleton which still uses .env config.
+            $symfonyTransport = $this->buildTransport($mailerName);
 
-            $toEmail = $this->toEmail;
-            $toName  = $this->toName ?: $this->toEmail;
-            $appName = Setting::get('app_name', config('app.name', 'Postara'));
-
-            Mail::html(
-                view('emails.test-send', compact('toName', 'appName'))->render(),
-                function ($message) use ($toEmail, $toName, $fromAddr, $fromName, $appName) {
-                    $message->to($toEmail, $toName)
-                            ->from($fromAddr, $fromName)
-                            ->subject("Test email from {$appName}");
-                }
+            // Wrap in a fresh Laravel Mailer instance
+            $mailer = new Mailer(
+                'postara-test',
+                app('view'),
+                new \Symfony\Component\Mailer\Mailer($symfonyTransport),
+                app('events')
             );
 
+            $html = view('emails.test-send', compact('toName', 'appName'))->render();
+
+            $mailer->html($html, function ($msg) use ($toEmail, $toName, $fromAddr, $fromName, $appName) {
+                $msg->to($toEmail, $toName)
+                    ->from($fromAddr, $fromName)
+                    ->subject("Test email from {$appName}");
+            });
+
             $this->result = 'success';
+
         } catch (\Throwable $e) {
             $this->result = 'error:' . $e->getMessage();
         }
+    }
+
+    /**
+     * Build a fresh Symfony transport directly from DB settings.
+     */
+    private function buildTransport(string $mailerName): TransportInterface
+    {
+        // Log / null mode — no actual sending
+        if ($mailerName === 'log') {
+            return new NullTransport();
+        }
+
+        // MailChannels HTTP transport
+        if ($mailerName === 'mailchannels') {
+            $key = (string) Setting::get('mailchannels_api_key', '');
+            if (empty($key)) {
+                throw new \RuntimeException('MailChannels API key is not configured.');
+            }
+            config(['services.mailchannels.api_key' => $key]);
+            return app(\App\Services\MailChannelsTransport::class);
+        }
+
+        // SMTP (covers both relay and self-hosted Postfix)
+        $host       = (string) Setting::get('mail_host', '127.0.0.1');
+        $port       = (int)    Setting::get('mail_port', 587);
+        $username   = (string) Setting::get('mail_username', '');
+        $password   = (string) Setting::get('mail_password', '');
+        $encryption = (string) Setting::get('mail_encryption', '');
+
+        $tls = $encryption === 'tls';
+        $transport = new EsmtpTransport($host, $port, $tls);
+
+        if (! empty($username)) {
+            $transport->setUsername($username);
+            $transport->setPassword($password);
+        }
+
+        return $transport;
     }
 
     public function render(): View
