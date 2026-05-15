@@ -1,0 +1,15 @@
+{
+    frankenphp
+    admin off
+}
+
+:8000 {
+    root * /app/public
+    encode zstd br gzip
+
+    php_server {
+        resolve_root_symlink
+    }
+
+    file_server
+}
